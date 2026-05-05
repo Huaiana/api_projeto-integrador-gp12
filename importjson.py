@@ -29,6 +29,16 @@ class Produto:
 
 
 @dataclass
+class Pedido:
+    id: int
+    cliente_id: int
+    produto_id: int
+    quantidade: int
+    valor_total: float
+    data_pedido: str
+
+
+@dataclass
 class Desconto:
     id: int
     codigo_cupom: str
@@ -52,11 +62,22 @@ class Frete:
         return distancia_km * self.valor_por_km
 
 
+@dataclass
+class Suporte:
+    id: int
+    cliente_id: int
+    assunto: str
+    mensagem: str
+    data_criacao: str
+    status: str
+
+
 lista_clientes: List[Cliente] = []
 lista_produtos: List[Produto] = []
 lista_descontos: List[Desconto] = []
 lista_fretes: List[Frete] = []
 lista_pedidos: List[dict] = []
+lista_suporte: List[Suporte] = []
 
 
 def conectar_bd():
@@ -67,7 +88,7 @@ def conectar_bd():
 
 def carregar_dados():
     """Importa todos os dados do SQL para as listas em Python."""
-    global lista_clientes, lista_produtos, lista_descontos, lista_fretes, lista_pedidos
+    global lista_clientes, lista_produtos, lista_descontos, lista_fretes, lista_pedidos, lista_suporte
 
     conn = conectar_bd()
     cursor = conn.cursor()
@@ -80,11 +101,17 @@ def carregar_dados():
         cursor.execute("SELECT * FROM produto")
         lista_produtos = [Produto(**dict(row)) for row in cursor.fetchall()]
 
+        cursor.execute("SELECT * FROM pedido")
+        lista_pedidos = [dict(row) for row in cursor.fetchall()]
+
         cursor.execute("SELECT * FROM desconto")
         lista_descontos = [Desconto(**dict(row)) for row in cursor.fetchall()]
 
         cursor.execute("SELECT * FROM frete")
         lista_fretes = [Frete(**dict(row)) for row in cursor.fetchall()]
+
+        cursor.execute("SELECT * FROM suporte")
+        lista_suporte = [Suporte(**dict(row)) for row in cursor.fetchall()]
 
         print("✅ Dados sincronizados com sucesso!")
     except Exception as e:
