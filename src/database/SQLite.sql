@@ -65,6 +65,17 @@ CREATE TABLE pedido (
   FOREIGN KEY (desconto_id) REFERENCES desconto(id)
 );
 
+
+CREATE TABLE suporte (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER,
+  assunto TEXT,
+  mensagem TEXT,
+  data_contato DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (cliente_id) REFERENCES cliente(id)   
+);
+
+
 INSERT INTO cliente (nome, email, senha, data_nascimento, endereco, telefone) VALUES
 ('vitoria', 'vmelo3578@gmail.com', 'vitorialinda123', '2006-07-17', 'Rua Exemplo, 100', '13997558495'),
 ('Lucas Silva', 'lucas.silva@outlook.com', 'lucas123456', '1995-03-12', 'Av. Central, 500', '11988776655'),
