@@ -140,7 +140,7 @@ def main():
 
     prod = lista_produtos[0]
     config_frete = lista_fretes[0]
-    distancia = 12.5
+    distancia = 0.20
 
     valor_frete = config_frete.calcular_frete(distancia)
 

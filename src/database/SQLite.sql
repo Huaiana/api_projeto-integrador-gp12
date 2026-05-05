@@ -42,7 +42,7 @@ CREATE TABLE desconto (
 
 CREATE TABLE frete (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  endereco_origem TEXT DEFAULT 'Rua Ademar de Barros, 576',
+  endereco_origem TEXT DEFAULT 'Avenida, Ademar de Barros, 576',
   valor_por_km REAL CHECK(valor_por_km >= 0),
   distancia_maxima REAL CHECK(distancia_maxima >= 0)
 );
@@ -103,7 +103,7 @@ INSERT INTO produto (
 );
 
 INSERT INTO frete (valor_por_km, distancia_maxima)
-VALUES (2.00, 20.00);
+VALUES (0.20, 0.50);
 
 INSERT INTO desconto (
   codigo_cupom, tipo, porcentagem_desconto, ativo
@@ -125,8 +125,8 @@ INSERT INTO pedido (
 VALUES (
   1,
   'Rua das Flores, 123',
-  10.00,
-  20.00,
+  0.20,
+  0.04,
   9.98,
   59.92,
   'PIX',

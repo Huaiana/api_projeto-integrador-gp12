@@ -12,7 +12,7 @@ export class FreteController {
                 return;
             }
 
-            const valorPorKm = 2.50; 
+            const valorPorKm = 0.20; 
             const valorFrete = distancia * valorPorKm;
 
             res.json({ valorFrete });
