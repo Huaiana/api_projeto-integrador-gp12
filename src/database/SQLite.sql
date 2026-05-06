@@ -44,7 +44,7 @@ CREATE TABLE frete (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   endereco_origem TEXT DEFAULT 'Avenida, Ademar de Barros, 576',
   valor_por_km REAL CHECK(valor_por_km >= 0),
-  distancia_maxima REAL CHECK(distancia_maxima >= 0)
+  distancia_maxima REAL CHECK(distancia_maxima >= 0) TEXT DEFAULT 'ATIVO' CHECK(status IN ('ATIVO', 'INATIVO')
 );
 
 
@@ -60,6 +60,8 @@ CREATE TABLE pedido (
   metodo_pagamento TEXT,
   cliente_id INTEGER,
   produto_id INTEGER,
+  status_compra TEXT DEFAULT 'PENDENTE' CHECK(status_compra IN ('PENDENTE', 'CONCLUIDO', 'CANCELADO')),
+
   FOREIGN KEY (cliente_id) REFERENCES cliente(id),
   FOREIGN KEY (produto_id) REFERENCES produto(id),
   FOREIGN KEY (desconto_id) REFERENCES desconto(id)
@@ -73,6 +75,18 @@ CREATE TABLE suporte (
   mensagem TEXT,
   data_contato DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (cliente_id) REFERENCES cliente(id)   
+);
+
+CREATE TABLE acompanhamento_entrega (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  pedido_id INTEGER,
+  status_entrega TEXT CHECK(status_entrega IN ('EM ROTA', 'ENTREGUE', 'ATRASADO')),
+  previsao_entrega DATETIME,
+  cliente_id INTEGER,
+  frete_id INTEGER,
+
+  FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+  FOREIGN KEY (pedido_id) REFERENCES pedido(id)
 );
 
 
@@ -133,6 +147,22 @@ VALUES (
   1,
   1
 );
+
+
+INSERT INTO acompanhamento_entrega (
+  pedido_id,
+  status_entrega,
+  previsao_entrega,
+  cliente_id,
+  frete_id
+) VALUES (
+  1,
+  'EM ROTA',
+  '2024-07-01 15:00:00',
+  1,
+  1
+);    
+
 
 
 UPDATE produto

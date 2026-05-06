@@ -72,12 +72,24 @@ class Suporte:
     status: str
 
 
+@dataclass
+class Acompanhamento:
+    id: int
+    pedido_id: int
+    status_entrega: str
+    previsao_entrega: str
+    cliente_id: int
+    frete_id: int
+
+
+
 lista_clientes: List[Cliente] = []
 lista_produtos: List[Produto] = []
 lista_descontos: List[Desconto] = []
 lista_fretes: List[Frete] = []
 lista_pedidos: List[dict] = []
 lista_suporte: List[Suporte] = []
+lista_acompanhamento: List[dict] = []
 
 
 def conectar_bd():
@@ -88,7 +100,7 @@ def conectar_bd():
 
 def carregar_dados():
     """Importa todos os dados do SQL para as listas em Python."""
-    global lista_clientes, lista_produtos, lista_descontos, lista_fretes, lista_pedidos, lista_suporte
+    global lista_clientes, lista_produtos, lista_descontos, lista_fretes, lista_pedidos, lista_suporte, lista_acompanhamento
 
     conn = conectar_bd()
     cursor = conn.cursor()
@@ -113,6 +125,9 @@ def carregar_dados():
         cursor.execute("SELECT * FROM suporte")
         lista_suporte = [Suporte(**dict(row)) for row in cursor.fetchall()]
 
+        cursor.execute("SELECT * FROM acompanhamento")
+        lista_acompanhamento = [dict(row) for row in cursor.fetchall()]
+
         print("✅ Dados sincronizados com sucesso!")
     except Exception as e:
         print(f"❌ Erro ao carregar dados: {e}")
@@ -129,6 +144,29 @@ def atualizar_estoque_no_banco(produto_id: int, novo_estoque: int):
             print(f"📦 Estoque ID {produto_id} atualizado para {novo_estoque}.")
         except sqlite3.Error as e:
             print(f"⚠️ Erro ao atualizar: {e}")
+
+
+def atualizar_pedido_no_banco(pedido_id: int, nova_quantidade: int, novo_valor_total: float):
+    with conectar_bd() as conn:
+        try:
+            conn.execute("UPDATE pedido SET quantidade = ?, valor_total = ? WHERE id = ?",
+                         (nova_quantidade, novo_valor_total, pedido_id))
+            conn.commit()
+
+            salva_pedido = {
+                "id": pedido_id,
+                "cliente_id": 1,
+                "produto_id": 1,
+                "quantidade": nova_quantidade,
+                "valor_total": novo_valor_total,
+                "data_pedido": "2024-06-01"
+            }
+
+            lista_pedidos.append(salva_pedido)
+            print(
+                f"🛒 Pedido ID {pedido_id} atualizado: Quantidade {nova_quantidade}, Valor Total R${novo_valor_total:.2f}.")
+        except sqlite3.Error as e:
+            print(f"⚠️ Erro ao atualizar pedido: {e}")
 
 
 def main():
