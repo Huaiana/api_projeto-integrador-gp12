@@ -1,6 +1,5 @@
 import {Desconto} from '../models/desconto';
 import {Request, Response} from 'express';  
-
 export class DescontoController {
     public async calcularDesconto(req: Request, res: Response): Promise<Response> {
         try {
