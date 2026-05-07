@@ -1,4 +1,6 @@
 import express from 'express'
+import accepts from 'accepts'
+
 
 import { ClienteController } from './controllers/ClienteController'
 import { ProdutoController } from './controllers/ProdutoController'
