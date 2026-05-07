@@ -1,10 +1,11 @@
 import { app } from '../server';
+import { Request, Response } from 'express';
 import { DescontoRepository } from '../repository/descontorepository';
 
 export function DescontoController() {
     const repository = new DescontoRepository();
 
-    app.post('/desconto/validar', async (req: Req, res: Res) => {
+    app.post('/desconto/validar', async (req: Request, res: Response) => {
         try {
             const { codigo, valorCompra } = req.body;
 
@@ -17,9 +18,9 @@ export function DescontoController() {
             let valorAbatido = 0;
 
             if (cupom.tipo === 'PORCENTAGEM') {
-                valorAbatido = valorCompra * (cupom.porcentagem_desconto / 20.00);
+                valorAbatido = valorCompra * ((cupom.porcentagem_desconto || 0) / 20.00);
             } else if (cupom.tipo === 'FIXO') {
-                valorAbatido = cupom.valor_fixo_desconto;
+                valorAbatido = cupom.valor_fixo_desconto || 0;
             }
 
             

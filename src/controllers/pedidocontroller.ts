@@ -1,18 +1,20 @@
-import { app} from '../server';
+import { app } from '../server';
+import { Request, Response } from 'express';
 import { PedidoRepository } from '../repository/pedidorepository';
+import { ProdutoRepository } from '../repository/produtorepository';
 
 export function PedidoController() {
     const pedidoRepository = new PedidoRepository();
     const produtoRepository = new ProdutoRepository();
 
-    app.get('/pedidos', (req: Req, res: Res) => {
+    app.get('/pedidos', (req: Request, res: Response) => {
         res.json(pedidoRepository.listar());
     });
 
     
-    app.get("/pedidos/:id", (req: Req, res: Res) => {
-        const id = parseInt(req.params.id);
-        const pedido = pedidoRepository.buscarPorId(id);
+    app.get("/pedidos/:id", (req: Request, res: Response) => {
+        const id = parseInt(req.params.id as string);
+        const pedido = pedidoRepository.listar().find((item) => item.id === id);
         
         if (!pedido) {
             return res.status(404).json({ message: 'Pedido não encontrado' });
@@ -35,16 +37,26 @@ export function PedidoController() {
                 return res.status(404).json({ erro: "Produto selecionado não existe." });
             }
 
-            
-            const valorTotal = produto.preco * quantidade;
+            const valorTotal = produto.valor * quantidade;
 
-            
             const novoPedido = pedidoRepository.salvar({
-                produtoId: produto.id,
-                nomeProduto: produto.nome,
+                produto_id: produto.id,
                 quantidade,
-                valorTotal,
-                data: new Date()
+                valor_total: valorTotal,
+                data_criacao: new Date().toISOString(),
+                id: 0,
+                cliente_id: 0,
+                valor_unitario: 0,
+                status: '',
+                data_atualizacao: '',
+                desconto_id: 0,
+                data_venda: '',
+                endereco_entrega: '',
+                distancia_calculada: 0,
+                valor_frete: 0,
+                valor_desconto: 0,
+                total_final: 0,
+                metodo_pagamento: ''
             });
 
             res.status(201).json(novoPedido);

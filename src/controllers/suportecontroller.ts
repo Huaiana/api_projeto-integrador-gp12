@@ -1,11 +1,12 @@
 import { app } from '../server';
+import { Request, Response } from 'express';
 import { SuporteRepository } from '../repository/suporterepository';
 
 export function SuporteController() {
     const repository = new SuporteRepository();
 
     
-    app.post("/suporte", async (req: Req, res: Res) => {
+    app.post("/suporte", async (req: Request, res: Response) => {
         try {
             const { cliente_id, assunto, mensagem } = req.body;
 
@@ -18,7 +19,7 @@ export function SuporteController() {
                 cliente_id,
                 assunto,
                 mensagem,
-                data_contato: new Date()
+                data_contato: new Date().toISOString()
             });
 
             return res.status(201).json({
@@ -34,7 +35,7 @@ export function SuporteController() {
     
     app.get("/suporte/cliente/:id", async (req, res) => {
         const cliente_id = parseInt(req.params.id);
-        const chamados = await repository.buscarPorCliente(cliente_id);
+        const chamados = await repository.listarPorCliente(cliente_id);
         return res.json(chamados);
     });
 }

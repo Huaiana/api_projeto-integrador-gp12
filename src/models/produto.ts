@@ -1,4 +1,5 @@
 export interface Produto {
+    valor: any
      id: number
     nome: string
     descricao: string

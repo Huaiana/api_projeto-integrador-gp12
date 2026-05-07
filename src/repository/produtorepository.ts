@@ -1,13 +1,16 @@
 import db from "../database/database";
 import { Produto } from "../models/produto";
 
-export class ProdutoRepository {    
+export class ProdutoRepository {
+    listarPorNome(arg0: string) {
+        throw new Error('Method not implemented.');
+    }    
     salvar(produto: Produto): Produto {
         const resultado = db
         .prepare("INSERT INTO produto (nome, descricao, preco, estoque) VALUES (?, ?, ?, ?)")
-        .run(produto.nome, produto.descricao, produto.preco, produto.estoque);
+        .run(produto.nome, produto.descricao, (produto as any).preco, produto.estoque);
 
-        return { id: resultado.lastInsertRowid as number, ...produto };
+        return { ...produto, id: resultado.lastInsertRowid as number };
     }
 
 listar(): Produto[] {
@@ -20,10 +23,10 @@ buscarPorId(id: number): Produto | null {
 
 atualizar(id: number, produto: Produto): Produto | null {
     const resultado = db.prepare("UPDATE produto SET nome = ?, descricao = ?, preco = ?, estoque = ? WHERE id = ?")
-    .run(produto.nome, produto.descricao, produto.preco, produto.estoque, id);
+    .run(produto.nome, produto.descricao, (produto as any).preco, produto.estoque, id);
     if (resultado.changes > 0) {
 
-        return { id, ...produto };
+        return { ...produto, id };
     }
 
     return null;

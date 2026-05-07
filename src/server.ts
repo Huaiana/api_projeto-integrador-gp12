@@ -11,7 +11,7 @@ import { AcompanhamentoController } from './controllers/acompanhamentocontroller
 import { SuporteController } from './controllers/suportecontroller'
 
 
-const app = express()
+export const app = express()
 app.use(express.json())
 
 ClienteController()

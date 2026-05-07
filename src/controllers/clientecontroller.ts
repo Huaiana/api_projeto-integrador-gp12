@@ -1,15 +1,15 @@
 import { app } from "../server";
-import { ClienteController } from "../repository/clienterepository"; // Considere renomear para ClienteRepository
+import { ClienteRepository } from "../repository/clienterepository";
 
 export function clienteController() {
-    const repository = new ClienteController(); // Instância única para as rotas
+    const repository = new ClienteRepository(); // Instância única para as rotas
 
     // GET: Listar ou filtrar por nome
     app.get("/clientes", async (req, res) => {
         const { nome } = req.query;
 
         if (nome) {
-            const clientes = repository.buscarPorName(nome as string);
+            const clientes = repository.listarPorName(nome as string);
             if (!clientes || (Array.isArray(clientes) && clientes.length === 0)) {
                 return res.status(404).json({ message: "Cliente não encontrado" });
             }
@@ -46,7 +46,14 @@ export function clienteController() {
             }
 
             // Correção: usando a instância 'repository' e não 'Repository'
-            const cliente = repository.salvar({ nome, email });
+            const cliente = repository.salvar({
+                nome, email,
+                senha: "",
+                data_nascimento: "",
+                endereco: "",
+                telefone: "",
+                cpf: ""
+            });
             return res.status(201).json(cliente);
             
         } catch (err) {
