@@ -1,26 +1,33 @@
-import { Database } from "better-sqlite3";
-export class AcompanhamentoController {
-    private db: Database;
+import db from "../database/database";
 
-    constructor(db: Database) {
-        this.db = db;
-    }
-    public getAcompanhamentoById(id: number) {
-        const stmt = this.db.prepare("SELECT * FROM acompanhamento WHERE id = ?");
-        return stmt.get(id);
-    }
-    public createAcompanhamento(data: any) {
-        const stmt = this.db.prepare("INSERT INTO acompanhamento (field1, field2) VALUES (?, ?)");
-        const info = stmt.run(data.field1, data.field2);
-        return info.lastInsertRowid;
-    }
-    public updateAcompanhamento(id: number, data: any) {
-        const stmt = this.db.prepare("UPDATE acompanhamento SET field1 = ?, field2 = ? WHERE id = ?");
-        stmt.run(data.field1, data.field2, id);
-    }
-    public deleteAcompanhamento(id: number) {
-        const stmt = this.db.prepare("DELETE FROM acompanhamento WHERE id = ?");
-        stmt.run(id);
-    }
+export interface Acompanhamento {
+    id?: number;
+    pedido_id: number;
+    status_entrega: 'EM ROTA' | 'ENTREGUE' | 'ATRASADO';
+    previsao_entrega: string;
+    cliente_id: number;
+    frete_id: number;
 }
 
+export class AcompanhamentoRepository {
+    salvar(dados: Acompanhamento): Acompanhamento {
+        const resultado = db
+            .prepare(`
+                INSERT INTO acompanhamento_entrega 
+                (pedido_id, status_entrega, previsao_entrega, cliente_id, frete_id) 
+                VALUES (?, ?, ?, ?, ?)
+            `)
+            .run(dados.pedido_id, dados.status_entrega, dados.previsao_entrega, dados.cliente_id, dados.frete_id);
+
+        return { ...dados, id: Number(resultado.lastInsertRowid) };
+    }
+
+    buscarPorPedido(pedidoId: number): Acompanhamento | null {
+        return (db.prepare("SELECT * FROM acompanhamento_entrega WHERE pedido_id = ?").get(pedidoId) as Acompanhamento) ?? null;
+    }
+
+    atualizarStatus(id: number, novoStatus: string): void {
+        db.prepare("UPDATE acompanhamento_entrega SET status_entrega = ? WHERE id = ?")
+          .run(novoStatus, id);
+    }
+}

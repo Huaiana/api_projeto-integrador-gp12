@@ -1,35 +1,40 @@
-import { Interface } from "node:readline";  
-import { Request, Response } from "express";
-import { Suporte } from "../models/suporte";    
+import { app } from '../server';
+import { SuporteRepository } from '../repository/suporterepository';
 
-export class SuporteController {
-    public async criarSuporte(req: Request, res: Response): Promise<Response> {
+export function SuporteController() {
+    const repository = new SuporteRepository();
+
+    
+    app.post("/suporte", async (req: Req, res: Res) => {
         try {
             const { cliente_id, assunto, mensagem } = req.body;
 
-            if (typeof cliente_id !== 'number' || typeof assunto !== 'string' || typeof mensagem !== 'string') {
-                return res.status(400).json({ error: 'Cliente ID deve ser um número, assunto e mensagem devem ser strings.' });
-            }   
+        
+            if (!cliente_id) throw new Error("ID do cliente é obrigatório.");
+            if (!assunto || assunto.trim().length < 5) throw new Error("Assunto muito curto.");
+            if (!mensagem || mensagem.trim().length < 10) throw new Error("Mensagem deve conter detalhes.");
 
-            const novoSuporte: Suporte = {
-                id: Date.now(),
+            const suporte = await repository.salvar({
                 cliente_id,
                 assunto,
-                mensagem,   
-                data_criacao: new Date().toISOString(),
-                status: 'Aberto'
-            };  
+                mensagem,
+                data_contato: new Date()
+            });
 
-            // Aqui você pode adicionar o novo suporte a um banco de dados ou a uma lista em memória
+            return res.status(201).json({
+                message: "Sua mensagem foi enviada com sucesso!",
+                protocolo: suporte.id
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Erro ao enviar suporte';
+            return res.status(400).json({ erro: message });
+        }
+    });
 
-            return res.status(201).json(novoSuporte);
-        }   
-
-        catch (error) {
-            console.error('Erro ao criar suporte:', error);
-            return res.status(500).json({ error: 'Ocorreu um erro ao criar o suporte.' });
-        }   
-
-    }
-}   
-
+    
+    app.get("/suporte/cliente/:id", async (req, res) => {
+        const cliente_id = parseInt(req.params.id);
+        const chamados = await repository.buscarPorCliente(cliente_id);
+        return res.json(chamados);
+    });
+}

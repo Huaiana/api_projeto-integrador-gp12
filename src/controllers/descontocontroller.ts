@@ -1,25 +1,39 @@
-import {Desconto} from '../models/desconto';
-import {Request, Response} from 'express';  
-export class DescontoController {
-    public async calcularDesconto(req: Request, res: Response): Promise<Response> {
-        try {
-            const { valorOriginal, percentualDesconto } = req.body;
+import { app } from '../server';
+import { DescontoRepository } from '../repository/descontorepository';
 
-            if (typeof valorOriginal !== 'number' || typeof percentualDesconto !== 'number') {
-                return res.status(400).json({ error: 'Valor original e percentual de desconto devem ser números.' });
+export function DescontoController() {
+    const repository = new DescontoRepository();
+
+    app.post('/desconto/validar', async (req: Req, res: Res) => {
+        try {
+            const { codigo, valorCompra } = req.body;
+
+            const cupom = await repository.buscarPorCodigo(codigo);
+
+            if (!cupom || !cupom.ativo) {
+                return res.status(404).json({ message: 'Cupom inválido ou expirado' });
             }
 
-            const valorDesconto = (valorOriginal * percentualDesconto) / 100;
-            const valorFinal = valorOriginal - valorDesconto;
+            let valorAbatido = 0;
 
-            return res.json({ valorOriginal, percentualDesconto, valorDesconto, valorFinal });
-        }
+            if (cupom.tipo === 'PORCENTAGEM') {
+                valorAbatido = valorCompra * (cupom.porcentagem_desconto / 20.00);
+            } else if (cupom.tipo === 'FIXO') {
+                valorAbatido = cupom.valor_fixo_desconto;
+            }
 
-        catch (error) {
-            console.error('Erro ao calcular desconto:', error);
-            return res.status(500).json({ error: 'Ocorreu um erro ao calcular o desconto.' });
+            
+            const descontoFinal = Math.min(valorAbatido, valorCompra);
+
+            res.json({
+                codigo: cupom.codigo_cupom,
+                tipo: cupom.tipo,
+                desconto: descontoFinal,
+                totalComDesconto: valorCompra - descontoFinal
+            });
+
+        } catch (error) {
+            res.status(400).json({ erro: 'Erro ao validar desconto' });
         }
-    }
+    });
 }
-
-

@@ -1,33 +1,23 @@
+import db from "../database/database";
+
 export interface Suporte {
-    id: number;
+    id?: number;
     cliente_id: number;
     assunto: string;
     mensagem: string;
-    data_criacao: string;
-    status: 'Aberto' | 'Fechado';
+    data_contato?: string;
 }
 
 export class SuporteRepository {
-    private suportes: Suporte[];    
-    constructor() { 
-        this.suportes = [];
+    salvar(suporte: Suporte): Suporte {
+        const resultado = db
+            .prepare("INSERT INTO suporte (cliente_id, assunto, mensagem) VALUES (?, ?, ?)")
+            .run(suporte.cliente_id, suporte.assunto, suporte.mensagem);
+
+        return { ...suporte, id: Number(resultado.lastInsertRowid) };
     }
 
-    public save(suporte: Suporte): void {
-        this.suportes.push(suporte);
-    }   
-    public findAll(): Suporte[] {
-        return this.suportes;
-    }       
-    public findById(id: number): Suporte | undefined {
-        return this.suportes.find(suporte => suporte.id === id);
-    }   
-    public updateStatus(id: number, status: 'Aberto' | 'Fechado'): boolean {    
-        const suporte = this.findById(id);
-        if (suporte) {
-            suporte.status = status;
-            return true;
-        }   
-        return false;
+    listarPorCliente(clienteId: number): Suporte[] {
+        return db.prepare("SELECT * FROM suporte WHERE cliente_id = ?").all(clienteId) as Suporte[];
     }
-}   
+}

@@ -82,7 +82,6 @@ class Acompanhamento:
     frete_id: int
 
 
-
 lista_clientes: List[Cliente] = []
 lista_produtos: List[Produto] = []
 lista_descontos: List[Desconto] = []

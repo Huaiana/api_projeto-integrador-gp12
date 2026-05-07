@@ -1,27 +1,47 @@
-import { Database } from "better-sqlite3";
-export class AcompanhamentoController {
-    private db: Database;
+import { app } from '../server';
+import { AcompanhamentoRepository } from '../repository/acompanhamentorepository';
 
-    constructor(db: Database) {
-        this.db = db;
-    }   
+export function AcompanhamentoController() {
+    const repository = new AcompanhamentoRepository();
 
-    public getAcompanhamentoById(id: number) {
-        const stmt = this.db.prepare("SELECT * FROM acompanhamento WHERE id = ?");
-        return stmt.get(id);
-    }
+    
+    app.get("/rastreio/:pedidoId", async (req, res) => {
+        try {
+            const pedidoId = parseInt(req.params.pedidoId);
 
-    public createAcompanhamento(data: any) {
-        const stmt = this.db.prepare("INSERT INTO acompanhamento (field1, field2) VALUES (?, ?)");
-        const info = stmt.run(data.field1, data.field2);
-        return info.lastInsertRowid;
-    }   
-    public updateAcompanhamento(id: number, data: any) {
-        const stmt = this.db.prepare("UPDATE acompanhamento SET field1 = ?, field2 = ? WHERE id = ?");
-        stmt.run(data.field1, data.field2, id);
-    }
-    public deleteAcompanhamento(id: number) {
-        const stmt = this.db.prepare("DELETE FROM acompanhamento WHERE id = ?");
-        stmt.run(id);
-    }
+            const acompanhamento = await repository.buscarPorPedido(pedidoId);
+
+            if (!acompanhamento) {
+                return res.status(404).json({ message: "Informações de entrega não encontradas para este pedido." });
+            }
+
+            return res.json({
+                pedido: acompanhamento.pedido_id,
+                status: acompanhamento.status_entrega, // 'EM ROTA', 'ENTREGUE', 'ATRASADO'
+                previsao: acompanhamento.previsao_entrega,
+                detalhes_logistica: `O pedido está vinculado ao frete código: ${acompanhamento.frete_id}`
+            });
+        } catch (error) {
+            return res.status(400).json({ erro: "Erro ao consultar rastreio." });
+        }
+    });
+
+
+    app.patch("/rastreio/:id/status", async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { novoStatus } = req.body;
+
+            const statusPermitidos = ['EM ROTA', 'ENTREGUE', 'ATRASADO'];
+            if (!statusPermitidos.includes(novoStatus)) {
+                throw new Error("Status inválido.");
+            }
+
+            await repository.atualizarStatus(parseInt(id), novoStatus);
+            return res.json({ message: "Status de entrega atualizado!" });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Erro ao atualizar entrega';
+            return res.status(400).json({ erro: message });
+        }
+    });
 }

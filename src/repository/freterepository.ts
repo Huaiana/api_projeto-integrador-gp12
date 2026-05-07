@@ -1,17 +1,21 @@
-import { Frete } from '../models/frete';
+import db from "../database/database";
+
+export interface Frete {
+    id: number;
+    endereco_origem: string;
+    valor_por_km: number;
+    distancia_maxima: number;
+}
 
 export class FreteRepository {
-    private frete: Frete[];
-
-    constructor() {
-        this.frete = [];
+  
+    buscarConfiguracaoAtiva(): Frete | null {
+        return (db.prepare("SELECT * FROM frete LIMIT 1").get() as Frete) ?? null;
     }
 
-    public save(frete: Frete): void {
-        this.frete.push(frete);
-    }
-
-    public findAll(): Frete[] {
-        return this.frete;
+    
+    atualizarPrecos(valorPorKm: number, distanciaMax: number): void {
+        db.prepare("UPDATE frete SET valor_por_km = ?, distancia_maxima = ? WHERE id = 1")
+          .run(valorPorKm, distanciaMax);
     }
 }

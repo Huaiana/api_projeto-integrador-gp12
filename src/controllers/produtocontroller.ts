@@ -1,28 +1,40 @@
-import {Produto} from '../models/produto';
+import { app } from '../server';
+import { ProdutoRepository } from '../repository/produtorepository';    
 
-export class ProdutoController {
-    private produtos: Produto[] = [];
+export function ProdutoController() {
+    const repository = new ProdutoRepository();
 
-    public adicionarProduto(produto: Produto): void {
-        this.produtos.push(produto);
+    app.get('/produtos', async (req, res) => {
+        const { nome} = req.query;
+
+    if (nome) {
+        const produto = repository.buscarPorName(nome as string);
+        if (!produto) return res.status(404).json({ message: 'Produto não encontrado' });
+        return res.json(produto);
     }
 
-    public listarProdutos(): Produto[] {
-        return this.produtos;
-    }
+    res.json(repository.listar());
+    });
 
-    public buscarProdutoPorId(id: number): Produto | undefined {
-        return this.produtos.find(produto => produto.id === id);
-    }
+    app.get("/produtos/:id", async (req, res) => {
+        const id = parseInt(req.params.id);
+        const produto = repository.buscarPorId(id);
+        if (!produto) return res.status(404).json({ message: 'Produto não encontrado' });
+        res.json(produto);
+    });
 
-    public removerProduto(id: number): void {
-        this.produtos = this.produtos.filter(produto => produto.id !== id);
-    }   
+    app.post("/produto", (req, res) => {
+        try {
+            const { nome, preco } = req.body;
 
-    public atualizarProduto(id: number, produtoAtualizado: Produto): void {
-        const index = this.produtos.findIndex(produto => produto.id === id);
-        if (index !== -1) {
-            this.produtos[index] = produtoAtualizado;
+            if (!nome || nome..trim() === 0) throw new Error("O nome é obrigatório.");
+            if (!preco || preco <= 0) throw new Error("O preço deve ser maior que zero.");
+
+            const produto = repository.salvar({ nome, preco });
+            res.status(201).json(produto);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Erro interno';
+            res.status(400).json({ erro: message });
         }
-    }
+    });
 }
