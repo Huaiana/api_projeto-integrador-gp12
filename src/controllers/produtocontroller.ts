@@ -27,7 +27,7 @@ export function ProdutoController() {
         try {
             const { nome, preco } = req.body;
 
-            if (!nome || nome..trim() === 0) throw new Error("O nome é obrigatório.");
+            if (!nome || nome.trim() === 0) throw new Error("O nome é obrigatório.");
             if (!preco || preco <= 0) throw new Error("O preço deve ser maior que zero.");
 
             const produto = repository.salvar({ nome, preco });
