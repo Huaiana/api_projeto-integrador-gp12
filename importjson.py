@@ -18,10 +18,10 @@ class Cliente:
 @dataclass
 class Produto:
     id: int
-    nome: str
+    nome: str = "Óleo Bifásico de Lavanda"
     descricao: str
-    volume: str
-    preco_base: float
+    volume: str = "120ml"
+    preco_base: float = "49.90"
     beneficios: str
     modo_uso: str
     indicacao: str
@@ -82,116 +82,132 @@ class Acompanhamento:
     frete_id: int
 
 
-lista_clientes: List[Cliente] = []
-lista_produtos: List[Produto] = []
-lista_descontos: List[Desconto] = []
-lista_fretes: List[Frete] = []
-lista_pedidos: List[dict] = []
-lista_suporte: List[Suporte] = []
-lista_acompanhamento: List[dict] = []
+class BaseRepository:
+    def __init__(self, db_path='empresa.db'):
+        self.db_path = db_path
+
+    def conectar(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
 
-def conectar_bd():
-    conn = sqlite3.connect('empresa.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+class ProdutoRepository(BaseRepository):
+    def listar(self) -> List[Produto]:
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM produto")
+            return [Produto(**dict(row)) for row in cursor.fetchall()]
 
-
-def carregar_dados():
-    """Importa todos os dados do SQL para as listas em Python."""
-    global lista_clientes, lista_produtos, lista_descontos, lista_fretes, lista_pedidos, lista_suporte, lista_acompanhamento
-
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    try:
-
-        cursor.execute("SELECT * FROM cliente")
-        lista_clientes = [Cliente(**dict(row)) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM produto")
-        lista_produtos = [Produto(**dict(row)) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM pedido")
-        lista_pedidos = [dict(row) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM desconto")
-        lista_descontos = [Desconto(**dict(row)) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM frete")
-        lista_fretes = [Frete(**dict(row)) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM suporte")
-        lista_suporte = [Suporte(**dict(row)) for row in cursor.fetchall()]
-
-        cursor.execute("SELECT * FROM acompanhamento")
-        lista_acompanhamento = [dict(row) for row in cursor.fetchall()]
-
-        print("✅ Dados sincronizados com sucesso!")
-    except Exception as e:
-        print(f"❌ Erro ao carregar dados: {e}")
-    finally:
-        conn.close()
-
-
-def atualizar_estoque_no_banco(produto_id: int, novo_estoque: int):
-    with conectar_bd() as conn:
-        try:
-            conn.execute("UPDATE produto SET estoque = ? WHERE id = ?",
-                         (novo_estoque, produto_id))
+    def atualizar_estoque(self, id: int, estoque: int):
+        with self.conectar() as conn:
+            conn.execute(
+                "UPDATE produto SET estoque = ? WHERE id = ?", (estoque, id))
             conn.commit()
-            print(f"📦 Estoque ID {produto_id} atualizado para {novo_estoque}.")
-        except sqlite3.Error as e:
-            print(f"⚠️ Erro ao atualizar: {e}")
 
 
-def atualizar_pedido_no_banco(pedido_id: int, nova_quantidade: int, novo_valor_total: float):
-    with conectar_bd() as conn:
-        try:
+class PedidoRepository(BaseRepository):
+    def listar(self) -> List[Pedido]:
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM pedido")
+            return [Pedido(**dict(row)) for row in cursor.fetchall()]
+
+    def atualizar(self, id: int, qtd: int, total: float):
+        with self.conectar() as conn:
             conn.execute("UPDATE pedido SET quantidade = ?, valor_total = ? WHERE id = ?",
-                         (nova_quantidade, novo_valor_total, pedido_id))
+                         (qtd, total, id))
             conn.commit()
 
-            salva_pedido = {
-                "id": pedido_id,
-                "cliente_id": 1,
-                "produto_id": 1,
-                "quantidade": nova_quantidade,
-                "valor_total": novo_valor_total,
-                "data_pedido": "2024-06-01"
-            }
 
-            lista_pedidos.append(salva_pedido)
-            print(
-                f"🛒 Pedido ID {pedido_id} atualizado: Quantidade {nova_quantidade}, Valor Total R${novo_valor_total:.2f}.")
-        except sqlite3.Error as e:
-            print(f"⚠️ Erro ao atualizar pedido: {e}")
+class EmpresaController:
+    def __init__(self):
+
+        self.prod_repo = ProdutoRepository()
+        self.ped_repo = PedidoRepository()
+
+        self.lista_clientes: List[Cliente] = []
+        self.lista_produtos: List[Produto] = []
+        self.lista_descontos: List[Desconto] = []
+        self.lista_fretes: List[Frete] = []
+        self.lista_pedidos: List[Pedido] = []
+        self.lista_suporte: List[Suporte] = []
+        self.lista_acompanhamento: List[Acompanhamento] = []
+
+    def carregar_dados(self):
+        """Sincroniza o banco com as listas locais (Equivalente ao import original)"""
+        try:
+            with self.prod_repo.conectar() as conn:
+                cursor = conn.cursor()
+
+                cursor.execute("SELECT * FROM cliente")
+                self.lista_clientes = [
+                    Cliente(**dict(row)) for row in cursor.fetchall()]
+
+                cursor.execute("SELECT * FROM desconto")
+                self.lista_descontos = [
+                    Desconto(**dict(row)) for row in cursor.fetchall()]
+
+                cursor.execute("SELECT * FROM frete")
+                self.lista_fretes = [Frete(**dict(row))
+                                     for row in cursor.fetchall()]
+
+                cursor.execute("SELECT * FROM suporte")
+                self.lista_suporte = [Suporte(**dict(row))
+                                      for row in cursor.fetchall()]
+
+                cursor.execute("SELECT * FROM acompanhamento")
+                self.lista_acompanhamento = [Acompanhamento(
+                    **dict(row)) for row in cursor.fetchall()]
+
+                self.lista_produtos = self.prod_repo.listar()
+                self.lista_pedidos = self.ped_repo.listar()
+
+            print("✅ Dados sincronizados com sucesso!")
+        except Exception as e:
+            print(f"❌ Erro ao carregar dados: {e}")
+
+    def atualizar_estoque_no_banco(self, produto_id: int, novo_estoque: int):
+        """Chama o repositório e atualiza a memória local."""
+        self.prod_repo.atualizar_estoque(produto_id, novo_estoque)
+        for p in self.lista_produtos:
+            if p.id == produto_id:
+                p.estoque = novo_estoque
+                break
+        print(f"📦 Estoque ID {produto_id} atualizado localmente e no banco.")
+
+    def atualizar_pedido_no_banco(self, pedido_id: int, qtd: int, total: float):
+        """Chama o repositório e atualiza a memória local."""
+        self.ped_repo.atualizar(pedido_id, qtd, total)
+        for ped in self.lista_pedidos:
+            if ped.id == pedido_id:
+                ped.quantidade = qtd
+                ped.valor_total = total
+                break
+        print(f"🛒 Pedido ID {pedido_id} atualizado localmente e no banco.")
 
 
 def main():
-    carregar_dados()
 
-    if not lista_produtos or not lista_fretes:
-        print("⚠️ Base de dados vazia. Certifique-se de que o 'empresa.db' existe e está populado.")
+    controller = EmpresaController()
+    controller.carregar_dados()
+
+    if not controller.lista_produtos or not controller.lista_fretes:
+        print("⚠️ Base de dados vazia ou inconsistente.")
         return
 
-    prod = lista_produtos[0]
-    config_frete = lista_fretes[0]
+    prod = controller.lista_produtos[0]
+    config_frete = controller.lista_fretes[0]
     distancia = 0.20
-
     valor_frete = config_frete.calcular_frete(distancia)
 
     print(f"\n--- Cupom Fiscal Simulado ---")
     print(f"Produto: {prod.nome}")
-    print(f"Preço Unitário: R${prod.preco_base:.2f}")
-
+    print(f"Preço Base: R${prod.preco_base:.2f}")
     if valor_frete is not None:
-        total = prod.preco_base + valor_frete
-        print(f"Frete ({distancia}km): R${valor_frete:.2f}")
-        print(f"TOTAL: R${total:.2f}")
-        print(f"----------------------------\n")
-    else:
-        print(f"❌ Entrega indisponível para a distância de {distancia}km.")
+        print(f"Frete: R${valor_frete:.2f}")
+        print(f"TOTAL: R${(prod.preco_base + valor_frete):.2f}")
+    print(f"----------------------------\n")
 
 
 if __name__ == "__main__":
