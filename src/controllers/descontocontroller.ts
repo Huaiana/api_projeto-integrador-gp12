@@ -2,7 +2,7 @@ import { app } from '../server';
 import { Request, Response } from 'express';
 import { DescontoRepository } from '../repository/descontorepository';
 
-export function DescontoController() {
+export function descontoController() {
     const repository = new DescontoRepository();
 
     app.post('/desconto/validar', async (req: Request, res: Response) => {

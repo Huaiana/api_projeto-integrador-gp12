@@ -1,10 +1,10 @@
 import { app } from '../server';
 import { FreteRepository } from '../repository/freterepository';
 
-export function FreteController() {
+export function freteController() {
     const repository = new FreteRepository();
 
-    app.get('/frete/calcular', async (req, res:) => {
+    app.get('/frete/calcular', async (req, res) => {
         try {
             const { endereco_entrega } = req.query;
 

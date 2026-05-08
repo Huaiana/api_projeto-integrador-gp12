@@ -1,8 +1,12 @@
 import { app } from '../server';
-import { AcompanhamentoRepository } from '../repository/acompanhamentorepository';
+import { acompanhamentoRepository } from '../repository/acompanhamentorepositry';  
+  
+export class acompanhamentocontroller {
+    private repository = new acompanhamentoRepository();
 
-export function AcompanhamentoController() {
-    const repository = new AcompanhamentoRepository();
+
+export function acompanhamentoController(): void {
+    const repository = new acompanhamentoRepository();
 
     
     app.get("/rastreio/:pedidoId", async (req, res) => {

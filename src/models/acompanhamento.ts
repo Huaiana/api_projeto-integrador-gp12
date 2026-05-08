@@ -1,4 +1,4 @@
-export interface Acompanhamento {
+export interface acompanhamento {
     id: number;
     pedidoId: number;
     clienteId: number;

@@ -2,24 +2,24 @@ import express from 'express'
 import accepts from 'accepts'
 
 
-import { ClienteController } from './controllers/ClienteController'
-import { ProdutoController } from './controllers/ProdutoController'
-import { PedidoController } from './controllers/pedidoController'
-import { FreteController } from './controllers/fretecontroller'
-import { DescontoController } from './controllers/descontocontroller'
-import { AcompanhamentoController } from './controllers/acompanhamentocontroller'
+import { clienteController } from './controllers/clientecontroller'
+import { ProdutoController } from './controllers/produtocontroller'
+import { pedidoController } from './controllers/pedidocontroller'
+import { freteController } from './controllers/fretecontroller'
+import { descontoController } from './controllers/descontocontroller'
+import { acompanhamentoController } from './controllers/acompanhamentocontroller'
 import { SuporteController } from './controllers/suportecontroller'
 
 
 export const app = express()
 app.use(express.json())
 
-ClienteController()
+clienteController()
 ProdutoController()
-PedidoController()  
-FreteController()
-DescontoController()
-AcompanhamentoController()
+pedidoController()
+freteController()
+descontoController()
+acompanhamentoController()
 SuporteController() 
 
 

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { PedidoRepository } from '../repository/pedidorepository';
 import { ProdutoRepository } from '../repository/produtorepository';
 
-export function PedidoController() {
+export function pedidoController() {
     const pedidoRepository = new PedidoRepository();
     const produtoRepository = new ProdutoRepository();
 
@@ -14,7 +14,7 @@ export function PedidoController() {
     
     app.get("/pedidos/:id", (req: Request, res: Response) => {
         const id = parseInt(req.params.id as string);
-        const pedido = pedidoRepository.listar().find((item) => item.id === id);
+        const pedido = pedidoRepository.listar().find(p => p.id === id);
         
         if (!pedido) {
             return res.status(404).json({ message: 'Pedido não encontrado' });

@@ -1,6 +1,8 @@
 import db from "../database/database";
+import { Request, Response } from 'express';
+import { app } from '../server';
 
-export interface Acompanhamento {
+export interface acompanhamento {
     id?: number;
     pedido_id: number;
     status_entrega: 'EM ROTA' | 'ENTREGUE' | 'ATRASADO';
@@ -9,8 +11,8 @@ export interface Acompanhamento {
     frete_id: number;
 }
 
-export class AcompanhamentoRepository {
-    salvar(dados: Acompanhamento): Acompanhamento {
+export class acompanhamentoRepository {
+    salvar(dados: acompanhamento): acompanhamento {
         const resultado = db
             .prepare(`
                 INSERT INTO acompanhamento_entrega 
@@ -22,8 +24,8 @@ export class AcompanhamentoRepository {
         return { ...dados, id: Number(resultado.lastInsertRowid) };
     }
 
-    buscarPorPedido(pedidoId: number): Acompanhamento | null {
-        return (db.prepare("SELECT * FROM acompanhamento_entrega WHERE pedido_id = ?").get(pedidoId) as Acompanhamento) ?? null;
+    buscarPorPedido(pedidoId: number): acompanhamento | null {
+        return (db.prepare("SELECT * FROM acompanhamento_entrega WHERE pedido_id = ?").get(pedidoId) as acompanhamento) ?? null;
     }
 
     atualizarStatus(id: number, novoStatus: string): void {
