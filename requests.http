@@ -58,7 +58,7 @@ GET http://localhost:3000/produtos?nome=Tenis azul
 # ─── VENDAS ──────────────────────────────────────────────────────────────────
 
 ### Criar venda com um produto
-POST http://localhost:3000/vendas
+POST http://localhost:3000/pedidos
 Content-Type: application/json
 
 {
@@ -71,7 +71,7 @@ Content-Type: application/json
 ###
 
 ### Criar venda com múltiplos produtos
-POST http://localhost:3000/vendas
+POST http://localhost:3000/pedidos
 Content-Type: application/json
 
 {
@@ -85,7 +85,7 @@ Content-Type: application/json
 ###
 
 ### Criar venda com estoque insuficiente (deve retornar erro)
-POST http://localhost:3000/vendas
+POST http://localhost:3000/pedido
 Content-Type: application/json
 
 {
@@ -98,7 +98,7 @@ Content-Type: application/json
 ###
 
 ### Listar todas as vendas
-GET http://localhost:3000/vendas
+GET http://localhost:3000/pedidos
 
 ###
 
