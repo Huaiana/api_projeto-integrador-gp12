@@ -2,21 +2,26 @@ import { app } from "../server";
 import { ClienteRepository } from "../repository/clienterepository";
 
 export function clienteController() {
-    const repository = new ClienteRepository(); // Instância única para as rotas
+    const repository = new ClienteRepository(); 
 
     // GET: Listar ou filtrar por nome
     app.get("/clientes", async (req, res) => {
         const { nome } = req.query;
 
         if (nome) {
-            const clientes = repository.listarPorName(nome as string);
-            if (!clientes || (Array.isArray(clientes) && clientes.length === 0)) {
+            // ADICIONADO O AWAIT AQUI
+            const clientes = await repository.listarPorName(nome as string);
+            
+            // Agora o TypeScript entende que 'clientes' é o resultado final
+            if (!clientes || (clientes as any).length === 0) {
                 return res.status(404).json({ message: "Cliente não encontrado" });
             }
             return res.json(clientes);
         }
 
-        return res.json(repository.findAll());
+        // ADICIONADO O AWAIT AQUI TAMBÉM
+        const todosClientes = await repository.findAll();
+        return res.json(todosClientes);
     });
 
     // GET: Buscar por ID
@@ -27,14 +32,15 @@ export function clienteController() {
             return res.status(400).json({ message: "ID inválido" });
         }
 
-        const cliente = repository.buscarPorId(id);
+        // ADICIONADO O AWAIT
+        const cliente = await repository.buscarPorId(id);
         if (!cliente) return res.status(404).json({ message: "Cliente não encontrado" });
         
         return res.json(cliente);
     });
 
     // POST: Criar novo cliente
-    app.post("/clientes", (req, res) => {
+    app.post("/clientes", async (req, res) => { // Adicionado async aqui
         try {
             const { nome, email } = req.body;
             
@@ -45,8 +51,8 @@ export function clienteController() {
                 return res.status(400).json({ message: "Email inválido." });
             }
 
-            // Correção: usando a instância 'repository' e não 'Repository'
-            const cliente = repository.salvar({
+            // ADICIONADO O AWAIT
+            const cliente = await repository.salvar({
                 nome, email,
                 senha: "",
                 data_nascimento: "",
