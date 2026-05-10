@@ -1,4 +1,6 @@
-import db from "../database";
+import Database from "better-sqlite3";
+
+const db = new Database("clientes.db");
 
 export interface Cliente {
     id?: number;

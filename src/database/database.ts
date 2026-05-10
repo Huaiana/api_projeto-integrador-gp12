@@ -82,7 +82,7 @@ db.exec(`
     FOREIGN KEY (cliente_id) REFERENCES cliente(id)       
   );
 
-  CREATE TABLE IF NOT EXISTS acompanhamento_entrega (
+  CREATE TABLE IF NOT EXISTS acompanhamento (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     pedido_id        INTEGER,
     cliente_id       INTEGER,

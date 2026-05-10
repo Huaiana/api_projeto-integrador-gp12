@@ -7,7 +7,7 @@ import { ProdutoController } from './controllers/produtocontroller'
 import { pedidoController } from './controllers/pedidocontroller'
 import { freteController } from './controllers/fretecontroller'
 import { descontoController } from './controllers/descontocontroller'
-import { acompanhamentoController } from './controllers/acompanhamentocontroller'
+import { acompanhamentocontroller } from './controllers/acompanhamentocontroller'
 import { SuporteController } from './controllers/suportecontroller'
 
 
@@ -19,7 +19,7 @@ ProdutoController()
 pedidoController()
 freteController()
 descontoController()
-acompanhamentoController()
+acompanhamentocontroller()
 SuporteController() 
 
 

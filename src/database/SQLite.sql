@@ -77,7 +77,7 @@ CREATE TABLE suporte (
   FOREIGN KEY (cliente_id) REFERENCES cliente(id)   
 );
 
-CREATE TABLE acompanhamento_entrega (
+CREATE TABLE acompanhamento (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   pedido_id INTEGER,
   status_entrega TEXT CHECK(status_entrega IN ('EM ROTA', 'ENTREGUE', 'ATRASADO')),
@@ -149,7 +149,7 @@ VALUES (
 );
 
 
-INSERT INTO acompanhamento_entrega (
+INSERT INTO acompanhamento (
   pedido_id,
   status_entrega,
   previsao_entrega,
