@@ -2,26 +2,24 @@ import { app } from "../server";
 import { ClienteRepository } from "../repository/clienterepository";
 
 export function clienteController() {
-    const repository = new ClienteRepository(); 
+    const repository = new ClienteRepository(); // Instância única para as rotas
 
     // GET: Listar ou filtrar por nome
     app.get("/clientes", async (req, res) => {
         const { nome } = req.query;
 
         if (nome) {
-            // ADICIONADO O AWAIT AQUI
-            const clientes = await repository.listarPorName(nome as string);
-            
-            // Agora o TypeScript entende que 'clientes' é o resultado final
-            if (!clientes || (clientes as any).length === 0) {
+            // Adicionado 'await' e 'as any' para garantir que o TS aceite o .length
+            const clientes = await repository.listarPorName(nome as string) as any;
+
+            if (!clientes || clientes.length === 0) {
                 return res.status(404).json({ message: "Cliente não encontrado" });
             }
             return res.json(clientes);
         }
 
-        // ADICIONADO O AWAIT AQUI TAMBÉM
-        const todosClientes = await repository.findAll();
-        return res.json(todosClientes);
+        // Adicionado 'await' aqui também para garantir o retorno dos dados
+        return res.json(await repository.findAll());
     });
 
     // GET: Buscar por ID
@@ -32,7 +30,7 @@ export function clienteController() {
             return res.status(400).json({ message: "ID inválido" });
         }
 
-        // ADICIONADO O AWAIT
+        // Adicionado 'await'
         const cliente = await repository.buscarPorId(id);
         if (!cliente) return res.status(404).json({ message: "Cliente não encontrado" });
         
@@ -40,7 +38,7 @@ export function clienteController() {
     });
 
     // POST: Criar novo cliente
-    app.post("/clientes", async (req, res) => { // Adicionado async aqui
+    app.post("/clientes", async (req, res) => {
         try {
             const { nome, email } = req.body;
             
@@ -51,7 +49,7 @@ export function clienteController() {
                 return res.status(400).json({ message: "Email inválido." });
             }
 
-            // ADICIONADO O AWAIT
+            // Adicionado 'await' para salvar corretamente no banco
             const cliente = await repository.salvar({
                 nome, email,
                 senha: "",
