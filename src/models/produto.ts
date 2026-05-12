@@ -1,6 +1,5 @@
 export interface Produto {
-    valor: any
-     id: number
+    id: number
     nome: string
     descricao: string
     volume: string
@@ -9,5 +8,4 @@ export interface Produto {
     modo_uso: string
     indicacao: string
     estoque: number
-
 }

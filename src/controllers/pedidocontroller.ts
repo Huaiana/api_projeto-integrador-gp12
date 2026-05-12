@@ -37,7 +37,7 @@ export function pedidoController() {
                 return res.status(404).json({ erro: "Produto selecionado não existe." });
             }
 
-            const valorTotal = produto.valor * quantidade;
+            const valorTotal = produto.preco_base * quantidade;
 
             const novoPedido = pedidoRepository.salvar({
                 produto_id: produto.id,
